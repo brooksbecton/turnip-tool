@@ -1,0 +1,20 @@
+{
+    "default": {
+        "awscloudformation": {
+            "AuthRoleName": "amplify-turnip-tool-default-83045-authRole",
+            "UnauthRoleArn": "arn:aws:iam::233303927919:role/amplify-turnip-tool-default-83045-unauthRole",
+            "AuthRoleArn": "arn:aws:iam::233303927919:role/amplify-turnip-tool-default-83045-authRole",
+            "Region": "us-east-1",
+            "DeploymentBucketName": "amplify-turnip-tool-default-83045-deployment",
+            "UnauthRoleName": "amplify-turnip-tool-default-83045-unauthRole",
+            "StackName": "amplify-turnip-tool-default-83045",
+            "StackId": "arn:aws:cloudformation:us-east-1:233303927919:stack/amplify-turnip-tool-default-83045/44aff090-7bf0-11ea-8e27-12342204bca9",
+            "AmplifyAppId": "d2iorigp3uhwh4"
+        },
+        "categories": {
+            "auth": {
+                "turniptool97b47077": {}
+            }
+        }
+    }
+}
