@@ -5,16 +5,26 @@ import { Card, IconButton, Chip, Text, useTheme } from "react-native-paper";
 import { ITurnipPrice } from "./types";
 import { getDayOfWeek, formatDate } from "./utils";
 
-export const TurnipPriceList: React.FC<{
+interface IProps {
   turnipPrices: ITurnipPrice[];
   deleteTurnipPrice: (newTurnipPrice: ITurnipPrice) => Promise<any>;
-}> = ({ deleteTurnipPrice, turnipPrices }) => {
+  onCardPress: (newTurnipPrice: ITurnipPrice) => void;
+}
+
+export const TurnipPriceList: React.FC<IProps> = ({
+  onCardPress,
+  deleteTurnipPrice,
+  turnipPrices,
+}) => {
   const theme = useTheme();
 
   return (
     <ScrollView>
       {turnipPrices.map((turnipPrice, index) => (
         <Card
+          onPress={() => {
+            onCardPress(turnipPrice);
+          }}
           style={{ marginBottom: 16 }}
           key={turnipPrice.id ? turnipPrice.id : index}
         >

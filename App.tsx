@@ -9,7 +9,11 @@ import { API, graphqlOperation } from "aws-amplify";
 import { ITurnipPrice } from "./src/types";
 import { AddTurnipPriceForm } from "./src/AddTurnipPriceForm";
 import { TurnipPriceList } from "./src/TurnipPriceList";
-import { createTurnipPrice, deleteTurnipPrice } from "./src/graphql/mutations";
+import {
+  createTurnipPrice,
+  deleteTurnipPrice,
+  updateTurnipPrice,
+} from "./src/graphql/mutations";
 import { listTurnipPrices } from "./src/graphql/queries";
 import config from "./aws-exports";
 
@@ -18,7 +22,9 @@ Amplify.configure(config);
 const App: React.FC = () => {
   const [turnipPrices, setTurnipPrices] = useState<ITurnipPrice[]>([]);
   const [isShowingAddForm, setIsShowingAddForm] = useState(false);
-
+  const [defaultTurnipPrice, setDefaultTurnipPrice] = useState<
+    ITurnipPrice | undefined
+  >();
   const theme = useTheme();
 
   useEffect(() => {
@@ -35,7 +41,6 @@ const App: React.FC = () => {
       console.log("error creating turnip price:", err);
     }
   }
-
   async function fetchDeleteTurnipPrice(newTurnipPrice: ITurnipPrice) {
     try {
       await API.graphql(
@@ -48,7 +53,6 @@ const App: React.FC = () => {
       console.log("error deleting turnip price:", err);
     }
   }
-
   async function fetchTurnipPrices() {
     try {
       const turnipData = await API.graphql(graphqlOperation(listTurnipPrices));
@@ -59,6 +63,25 @@ const App: React.FC = () => {
       console.log("error fetching turnipPrices");
     }
   }
+  async function fetchUpdateTurnipPrice(newTurnipPrice: ITurnipPrice) {
+    try {
+      const turnipData = await API.graphql(
+        graphqlOperation(updateTurnipPrice, { input: newTurnipPrice })
+      );
+      //@ts-ignore
+      const updatedTurnipPrice = turnipData.data.updateTurnipPrice;
+      const updatedTurnipPrices = turnipPrices.map((tP) => {
+        if (tP.id === updatedTurnipPrice.id) {
+          return updatedTurnipPrice;
+        } else {
+          return tP;
+        }
+      });
+      setTurnipPrices(updatedTurnipPrices);
+    } catch (err) {
+      console.log("error updating turnipPrices", err);
+    }
+  }
 
   async function signOut() {
     try {
@@ -66,6 +89,23 @@ const App: React.FC = () => {
     } catch (error) {
       console.log("error signing out: ", error);
     }
+  }
+
+  function handleFormSubmit(turnipPrice: ITurnipPrice) {
+    if (turnipPrice.id) {
+      fetchUpdateTurnipPrice(turnipPrice);
+    } else {
+      addTurnipPrice(turnipPrice);
+    }
+  }
+
+  function handleFormClose() {
+    setDefaultTurnipPrice({ amPrice: 0, pmPrice: 0, date: new Date() });
+  }
+
+  function handleCardPress(turnipPrice: ITurnipPrice) {
+    setDefaultTurnipPrice(turnipPrice);
+    setIsShowingAddForm(true);
   }
 
   return (
@@ -80,7 +120,9 @@ const App: React.FC = () => {
         />
       </Appbar>
       <AddTurnipPriceForm
-        addTurnipPrice={addTurnipPrice}
+        defaultTurnipPrice={defaultTurnipPrice}
+        handleFormSubmit={handleFormSubmit}
+        handleFormClose={handleFormClose}
         setIsShowingAddForm={setIsShowingAddForm}
         isShowingAddForm={isShowingAddForm}
       />
@@ -92,6 +134,7 @@ const App: React.FC = () => {
         }}
       >
         <TurnipPriceList
+          onCardPress={handleCardPress}
           deleteTurnipPrice={fetchDeleteTurnipPrice}
           turnipPrices={turnipPrices}
         />
@@ -103,7 +146,9 @@ const App: React.FC = () => {
             bottom: 0,
           }}
           icon="plus"
-          onPress={() => setIsShowingAddForm(true)}
+          onPress={() => {
+            setIsShowingAddForm(true);
+          }}
         />
       </View>
     </PaperProvider>

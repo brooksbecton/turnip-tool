@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Dialog,
   Portal,
@@ -10,32 +10,57 @@ import {
 import { ITurnipPrice } from "./types";
 
 interface IProps {
+  defaultTurnipPrice: ITurnipPrice | undefined;
   isShowingAddForm: boolean;
   setIsShowingAddForm: any;
-  addTurnipPrice: (newTurnipPrice: ITurnipPrice) => Promise<any>;
+  handleFormSubmit: (newTurnipPrice: ITurnipPrice) => void;
+  handleFormClose: () => void;
 }
 
 export const AddTurnipPriceForm: React.FC<IProps> = ({
-  addTurnipPrice,
+  defaultTurnipPrice,
+  handleFormSubmit,
   isShowingAddForm,
   setIsShowingAddForm,
+  handleFormClose,
 }) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [id, setId] = useState("");
   const [amPrice, setAmPrice] = useState<number>(0);
   const [pmPrice, setPmPrice] = useState<number>(0);
-  const [date] = useState(new Date());
+  const [date, setDate] = useState(new Date());
 
   const theme = useTheme();
+  useEffect(() => {
+    if (isShowingAddForm === false) {
+      handleFormClose();
+    }
+  }, [isShowingAddForm]);
 
-  async function handleSubmit() {
+  useEffect(() => {
+    if (defaultTurnipPrice && isShowingAddForm === true) {
+      setId(defaultTurnipPrice.id || "");
+      setAmPrice(defaultTurnipPrice.amPrice);
+      setPmPrice(defaultTurnipPrice.pmPrice);
+      setDate(defaultTurnipPrice.date);
+    }
+  }, [defaultTurnipPrice, isShowingAddForm]);
+
+  function reset() {
+    setId("");
+    setAmPrice(0);
+    setPmPrice(0);
+    setDate(new Date());
+    setIsShowingAddForm(false);
+  }
+
+  function handleSubmit() {
     if (amPrice && pmPrice) {
       setIsLoading(true);
       try {
-        await addTurnipPrice({ amPrice, pmPrice, date });
+        handleFormSubmit({ id, amPrice, pmPrice, date });
 
-        setIsShowingAddForm(false);
-        setAmPrice(0);
-        setPmPrice(0);
+        reset();
       } catch (err) {
         console.log("error creating turnip price:", err);
       } finally {
@@ -43,13 +68,9 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
       }
     }
   }
-
   return (
     <Portal>
-      <Dialog
-        visible={isShowingAddForm}
-        onDismiss={() => setIsShowingAddForm(false)}
-      >
+      <Dialog visible={isShowingAddForm} onDismiss={() => reset()}>
         <Dialog.Title>Add New Turnip Price</Dialog.Title>
         <Dialog.Content>
           <TextInput
@@ -61,6 +82,7 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
             textContentType={"oneTimeCode"}
             value={amPrice !== 0 ? String(amPrice) : undefined}
             placeholder="AM Price"
+            label="AM Price"
           />
           <TextInput
             keyboardType={"numeric"}
@@ -72,6 +94,7 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
             textContentType={"oneTimeCode"}
             value={pmPrice !== 0 ? String(pmPrice) : undefined}
             placeholder="PM Price"
+            label="PM Price"
           />
         </Dialog.Content>
         <Dialog.Actions>
