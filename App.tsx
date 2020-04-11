@@ -3,12 +3,20 @@ import {
   View,
   Text,
   StyleSheet,
-  TextInput,
-  Button,
   DatePickerIOS,
+  ScrollView,
 } from "react-native";
+import {
+  Appbar,
+  Card,
+  Dialog,
+  Portal,
+  Button,
+  TextInput,
+} from "react-native-paper";
 import { withAuthenticator } from "aws-amplify-react-native";
 import Amplify from "aws-amplify";
+import { Provider as PaperProvider } from "react-native-paper";
 
 import { API, graphqlOperation } from "aws-amplify";
 import { createTurnipPrice } from "./src/graphql/mutations";
@@ -20,79 +28,129 @@ Amplify.configure(config);
 interface ITurnipPrice {
   id?: string;
   price: number;
-  dateAdded: number;
+  dateAdded: Date;
 }
 
-const initialState: ITurnipPrice = {
-  price: 0  ,
-  dateAdded: new Date().getTime(),
+const TurnipPriceList: React.FC<{ turnipPrices: ITurnipPrice[] }> = ({
+  turnipPrices,
+}) => {
+  return (
+    <ScrollView>
+      {turnipPrices.map((turnipPrice, index) => (
+        <Card
+          style={{ marginBottom: 16 }}
+          key={turnipPrice.id ? turnipPrice.id : index}
+        >
+          <Card.Content>
+            <Text>{turnipPrice.price} Bells</Text>
+            <Text>{new Date(turnipPrice.dateAdded).toISOString()}</Text>
+          </Card.Content>
+        </Card>
+      ))}
+    </ScrollView>
+  );
 };
 
-const App = () => {
+const AddTurnipPriceForm: React.FC<{
+  addTurnipPrice: (newTurnipPrice: ITurnipPrice) => Promise<any>;
+}> = ({ addTurnipPrice }) => {
+  const initialState: ITurnipPrice = {
+    price: 0,
+    dateAdded: new Date(),
+  };
   const [formState, setFormState] = useState(initialState);
-  const [turnipPrices, setTurnipPrices] = useState<ITurnipPrice[]>([]);
-
-  useEffect(() => {
-    fetchTurnipPrices();
-  }, []);
 
   function setInput(key: string, value: any) {
     setFormState({ ...formState, [key]: value });
   }
 
-  async function fetchTurnipPrices() {
-    try {
-      const todoData = await API.graphql(graphqlOperation(listTurnipPrices));
-      //@ts-ignore
-      const todos = todoData.data.listTurnipPrices.items;
-      setTurnipPrices(todos);
-    } catch (err) {
-      console.log("error fetching todos");
-    }
-  }
-
-  async function addTurnipPrice() {
+  async function handleSubmit() {
     try {
       const turnipPrice = { ...formState };
-      setTurnipPrices([...turnipPrices, turnipPrice]);
       setFormState(initialState);
-      await API.graphql(
-        graphqlOperation(createTurnipPrice, { input: turnipPrice })
-      );
+      await addTurnipPrice(turnipPrice);
     } catch (err) {
       console.log("error creating turnip price:", err);
     }
   }
 
   return (
-    <View style={styles.container}>
+    <>
       <TextInput
-        onChangeText={(val) => setInput("price", val)}
-        style={styles.input}
+        onChangeText={(val) => {
+          setInput("price", val);
+          // Default to current time
+          setInput("dateAdded", new Date().toISOString());
+        }}
         value={String(formState.price)}
         placeholder="Price"
       />
 
-      <DatePickerIOS
-        date={new Date(formState.dateAdded)}
-        onDateChange={(newDate) => setInput("dateAdded", newDate)}
-      />
-      <Button title="Create Turnip Price" onPress={addTurnipPrice} />
-      {turnipPrices.map((turnipPrice, index) => (
-        <View key={turnipPrice.id ? turnipPrice.id : index} style={styles.todo}>
-          <Text style={styles.todoName}>{turnipPrice.price} Bells</Text>
-          <Text>{turnipPrice.dateAdded}</Text>
-        </View>
-      ))}
-    </View>
+      <Button onPress={handleSubmit}>Create Turnip Price</Button>
+    </>
   );
 };
 
-const styles = StyleSheet.create({
-  container: { flex: 1, justifyContent: "center", padding: 20 },
-  todo: { marginBottom: 15 },
-  input: { height: 50, backgroundColor: "#ddd", marginBottom: 10, padding: 8 },
-  todoName: { fontSize: 18 },
-});
+const App: React.FC = () => {
+  const [turnipPrices, setTurnipPrices] = useState<ITurnipPrice[]>([]);
+  const [isShowingAddForm, setIsShowingAddForm] = useState(false);
+
+  useEffect(() => {
+    fetchTurnipPrices();
+  }, []);
+
+  async function addTurnipPrice(newTurnipPrice: ITurnipPrice) {
+    try {
+      await API.graphql(
+        graphqlOperation(createTurnipPrice, { input: newTurnipPrice })
+      );
+      setTurnipPrices([newTurnipPrice, ...turnipPrices]);
+    } catch (err) {
+      console.log("error creating turnip price:", err);
+    }
+  }
+
+  async function fetchTurnipPrices() {
+    try {
+      const turnipData = await API.graphql(graphqlOperation(listTurnipPrices));
+      //@ts-ignore
+      const turnipPrices = turnipData.data.listTurnipPrices.items;
+      setTurnipPrices(turnipPrices);
+    } catch (err) {
+      console.log("error fetching turnipPrices");
+    }
+  }
+
+  return (
+    <PaperProvider>
+      <Appbar>
+        <Appbar.Action icon="plus" onPress={() => setIsShowingAddForm(true)} />
+      </Appbar>
+      <Portal>
+        <Dialog
+          visible={isShowingAddForm}
+          onDismiss={() => setIsShowingAddForm(false)}
+        >
+          <Dialog.Title>Add new turnip price</Dialog.Title>
+          <Dialog.Content>
+            <AddTurnipPriceForm addTurnipPrice={addTurnipPrice} />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button onPress={() => setIsShowingAddForm(false)}>Cancel</Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
+      <View
+        style={{
+          backgroundColor: "#EEEEEE",
+          padding: 18,
+          flex: 1,
+        }}
+      >
+        <TurnipPriceList turnipPrices={turnipPrices} />
+      </View>
+    </PaperProvider>
+  );
+};
 
 export default withAuthenticator(App);
