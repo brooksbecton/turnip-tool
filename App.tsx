@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  StyleSheet,
-  DatePickerIOS,
-  ScrollView,
-} from "react-native";
+import { View, Text, ScrollView, StatusBar } from "react-native";
 import {
   Appbar,
   Card,
@@ -13,13 +7,14 @@ import {
   Portal,
   Button,
   TextInput,
+  IconButton,
 } from "react-native-paper";
 import { withAuthenticator } from "aws-amplify-react-native";
 import Amplify from "aws-amplify";
 import { Provider as PaperProvider } from "react-native-paper";
 
 import { API, graphqlOperation } from "aws-amplify";
-import { createTurnipPrice } from "./src/graphql/mutations";
+import { createTurnipPrice, deleteTurnipPrice } from "./src/graphql/mutations";
 import { listTurnipPrices } from "./src/graphql/queries";
 import config from "./aws-exports";
 
@@ -31,9 +26,10 @@ interface ITurnipPrice {
   dateAdded: Date;
 }
 
-const TurnipPriceList: React.FC<{ turnipPrices: ITurnipPrice[] }> = ({
-  turnipPrices,
-}) => {
+const TurnipPriceList: React.FC<{
+  turnipPrices: ITurnipPrice[];
+  deleteTurnipPrice: (newTurnipPrice: ITurnipPrice) => Promise<any>;
+}> = ({ deleteTurnipPrice, turnipPrices }) => {
   return (
     <ScrollView>
       {turnipPrices.map((turnipPrice, index) => (
@@ -41,10 +37,19 @@ const TurnipPriceList: React.FC<{ turnipPrices: ITurnipPrice[] }> = ({
           style={{ marginBottom: 16 }}
           key={turnipPrice.id ? turnipPrice.id : index}
         >
-          <Card.Content>
-            <Text>{turnipPrice.price} Bells</Text>
-            <Text>{new Date(turnipPrice.dateAdded).toISOString()}</Text>
-          </Card.Content>
+          <Card.Title
+            title={`${turnipPrice.price} Bells`}
+            subtitle={new Date(turnipPrice.dateAdded).toISOString()}
+            right={(props) => (
+              <IconButton
+                {...props}
+                icon="delete"
+                onPress={() => {
+                  deleteTurnipPrice(turnipPrice);
+                }}
+              />
+            )}
+          />
         </Card>
       ))}
     </ScrollView>
@@ -52,41 +57,67 @@ const TurnipPriceList: React.FC<{ turnipPrices: ITurnipPrice[] }> = ({
 };
 
 const AddTurnipPriceForm: React.FC<{
+  isShowingAddForm: boolean;
+  setIsShowingAddForm: any;
   addTurnipPrice: (newTurnipPrice: ITurnipPrice) => Promise<any>;
-}> = ({ addTurnipPrice }) => {
-  const initialState: ITurnipPrice = {
-    price: 0,
-    dateAdded: new Date(),
-  };
-  const [formState, setFormState] = useState(initialState);
-
-  function setInput(key: string, value: any) {
-    setFormState({ ...formState, [key]: value });
-  }
+}> = ({ addTurnipPrice, isShowingAddForm, setIsShowingAddForm }) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [price, setPrice] = useState<number | undefined>();
+  const [date] = useState(new Date());
 
   async function handleSubmit() {
-    try {
-      const turnipPrice = { ...formState };
-      setFormState(initialState);
-      await addTurnipPrice(turnipPrice);
-    } catch (err) {
-      console.log("error creating turnip price:", err);
+    if (price) {
+      setIsLoading(true);
+      try {
+        await addTurnipPrice({ price, dateAdded: date });
+        setIsShowingAddForm(false);
+        setPrice(undefined);
+      } catch (err) {
+        console.log("error creating turnip price:", err);
+      } finally {
+        setIsLoading(false);
+      }
     }
   }
 
   return (
     <>
-      <TextInput
-        onChangeText={(val) => {
-          setInput("price", val);
-          // Default to current time
-          setInput("dateAdded", new Date().toISOString());
-        }}
-        value={String(formState.price)}
-        placeholder="Price"
-      />
-
-      <Button onPress={handleSubmit}>Create Turnip Price</Button>
+      <Portal>
+        <Dialog
+          visible={isShowingAddForm}
+          onDismiss={() => setIsShowingAddForm(false)}
+        >
+          <Dialog.Title>Add New Turnip Price</Dialog.Title>
+          <Dialog.Content>
+            <TextInput
+              keyboardType={"numeric"}
+              onChangeText={(val) => {
+                setPrice(Number(val));
+              }}
+              textContentType={"oneTimeCode"}
+              value={price ? String(price) : undefined}
+              placeholder="Price"
+            />
+          </Dialog.Content>
+          <Dialog.Actions>
+            <Button
+              color={"red"}
+              disabled={isLoading || price === undefined}
+              onPress={() => setIsShowingAddForm(false)}
+            >
+              Cancel
+            </Button>
+            <Button
+              disabled={price === undefined}
+              icon={"plus"}
+              loading={isLoading}
+              onPress={() => handleSubmit()}
+            >
+              OK
+            </Button>
+          </Dialog.Actions>
+        </Dialog>
+      </Portal>
     </>
   );
 };
@@ -110,6 +141,19 @@ const App: React.FC = () => {
     }
   }
 
+  async function fetchDeleteTurnipPrice(newTurnipPrice: ITurnipPrice) {
+    try {
+      await API.graphql(
+        graphqlOperation(deleteTurnipPrice, {
+          input: { id: newTurnipPrice.id },
+        })
+      );
+      setTurnipPrices(turnipPrices.filter((tP) => tP.id !== newTurnipPrice.id));
+    } catch (err) {
+      console.log("error deleting turnip price:", err);
+    }
+  }
+
   async function fetchTurnipPrices() {
     try {
       const turnipData = await API.graphql(graphqlOperation(listTurnipPrices));
@@ -123,23 +167,15 @@ const App: React.FC = () => {
 
   return (
     <PaperProvider>
+      <StatusBar />
       <Appbar>
         <Appbar.Action icon="plus" onPress={() => setIsShowingAddForm(true)} />
       </Appbar>
-      <Portal>
-        <Dialog
-          visible={isShowingAddForm}
-          onDismiss={() => setIsShowingAddForm(false)}
-        >
-          <Dialog.Title>Add new turnip price</Dialog.Title>
-          <Dialog.Content>
-            <AddTurnipPriceForm addTurnipPrice={addTurnipPrice} />
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button onPress={() => setIsShowingAddForm(false)}>Cancel</Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
+      <AddTurnipPriceForm
+        addTurnipPrice={addTurnipPrice}
+        setIsShowingAddForm={setIsShowingAddForm}
+        isShowingAddForm={isShowingAddForm}
+      />
       <View
         style={{
           backgroundColor: "#EEEEEE",
@@ -147,7 +183,10 @@ const App: React.FC = () => {
           flex: 1,
         }}
       >
-        <TurnipPriceList turnipPrices={turnipPrices} />
+        <TurnipPriceList
+          deleteTurnipPrice={fetchDeleteTurnipPrice}
+          turnipPrices={turnipPrices}
+        />
       </View>
     </PaperProvider>
   );
