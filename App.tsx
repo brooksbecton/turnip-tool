@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from "react";
-import { View, Text, ScrollView, StatusBar } from "react-native";
+import {
+  View,
+  ScrollView,
+  StatusBar,
+} from "react-native";
 import {
   Appbar,
   Card,
@@ -8,9 +12,10 @@ import {
   Button,
   TextInput,
   IconButton,
+  FAB,
 } from "react-native-paper";
 import { withAuthenticator } from "aws-amplify-react-native";
-import Amplify from "aws-amplify";
+import Amplify, { Auth } from "aws-amplify";
 import { Provider as PaperProvider } from "react-native-paper";
 
 import { API, graphqlOperation } from "aws-amplify";
@@ -81,44 +86,42 @@ const AddTurnipPriceForm: React.FC<{
   }
 
   return (
-    <>
-      <Portal>
-        <Dialog
-          visible={isShowingAddForm}
-          onDismiss={() => setIsShowingAddForm(false)}
-        >
-          <Dialog.Title>Add New Turnip Price</Dialog.Title>
-          <Dialog.Content>
-            <TextInput
-              keyboardType={"numeric"}
-              onChangeText={(val) => {
-                setPrice(Number(val));
-              }}
-              textContentType={"oneTimeCode"}
-              value={price ? String(price) : undefined}
-              placeholder="Price"
-            />
-          </Dialog.Content>
-          <Dialog.Actions>
-            <Button
-              color={"red"}
-              disabled={isLoading || price === undefined}
-              onPress={() => setIsShowingAddForm(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              disabled={price === undefined}
-              icon={"plus"}
-              loading={isLoading}
-              onPress={() => handleSubmit()}
-            >
-              OK
-            </Button>
-          </Dialog.Actions>
-        </Dialog>
-      </Portal>
-    </>
+    <Portal>
+      <Dialog
+        visible={isShowingAddForm}
+        onDismiss={() => setIsShowingAddForm(false)}
+      >
+        <Dialog.Title>Add New Turnip Price</Dialog.Title>
+        <Dialog.Content>
+          <TextInput
+            keyboardType={"numeric"}
+            onChangeText={(val) => {
+              setPrice(Number(val));
+            }}
+            textContentType={"oneTimeCode"}
+            value={price ? String(price) : undefined}
+            placeholder="Price"
+          />
+        </Dialog.Content>
+        <Dialog.Actions>
+          <Button
+            color={"red"}
+            disabled={isLoading}
+            onPress={() => setIsShowingAddForm(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            disabled={price === undefined}
+            icon={"plus"}
+            loading={isLoading}
+            onPress={() => handleSubmit()}
+          >
+            OK
+          </Button>
+        </Dialog.Actions>
+      </Dialog>
+    </Portal>
   );
 };
 
@@ -165,11 +168,25 @@ const App: React.FC = () => {
     }
   }
 
+  async function signOut() {
+    try {
+      await Auth.signOut();
+      console.log('success')
+    } catch (error) {
+      console.log("error signing out: ", error);
+    }
+  }
+
   return (
     <PaperProvider>
       <StatusBar />
-      <Appbar>
-        <Appbar.Action icon="plus" onPress={() => setIsShowingAddForm(true)} />
+      <Appbar style={{ paddingTop: 18, justifyContent: "flex-end" }}>
+        <Appbar.Action
+          icon="logout"
+          onPress={() => {
+            signOut();
+          }}
+        />
       </Appbar>
       <AddTurnipPriceForm
         addTurnipPrice={addTurnipPrice}
@@ -186,6 +203,16 @@ const App: React.FC = () => {
         <TurnipPriceList
           deleteTurnipPrice={fetchDeleteTurnipPrice}
           turnipPrices={turnipPrices}
+        />
+        <FAB
+          style={{
+            position: "absolute",
+            margin: 16,
+            right: 0,
+            bottom: 0,
+          }}
+          icon="plus"
+          onPress={() => setIsShowingAddForm(true)}
         />
       </View>
     </PaperProvider>
