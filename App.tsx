@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { View, StatusBar } from "react-native";
-import { Appbar, FAB, useTheme } from "react-native-paper";
+import { DefaultTheme, Appbar, FAB, useTheme } from "react-native-paper";
 import { withAuthenticator } from "aws-amplify-react-native";
 import Amplify, { Auth } from "aws-amplify";
 import { Provider as PaperProvider } from "react-native-paper";
@@ -108,8 +108,17 @@ const App: React.FC = () => {
     setIsShowingAddForm(true);
   }
 
+  const defaultTheme = {
+    ...DefaultTheme,
+    roundness: 8,
+    colors: {
+      ...DefaultTheme.colors,
+      primary: "#2e7d32",
+      accent: "#2196f3",
+    },
+  };
   return (
-    <PaperProvider>
+    <PaperProvider theme={defaultTheme}>
       <StatusBar />
       <Appbar style={{ paddingTop: 18, justifyContent: "flex-end" }}>
         <Appbar.Action

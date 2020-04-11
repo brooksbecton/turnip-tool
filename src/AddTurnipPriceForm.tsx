@@ -83,6 +83,7 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
             value={amPrice !== 0 ? String(amPrice) : undefined}
             placeholder="AM Price"
             label="AM Price"
+            style={{ marginBottom: 18 }}
           />
           <TextInput
             keyboardType={"numeric"}
