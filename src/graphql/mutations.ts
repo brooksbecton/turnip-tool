@@ -9,8 +9,9 @@ export const createTurnipPrice = /* GraphQL */ `
   ) {
     createTurnipPrice(input: $input, condition: $condition) {
       id
-      price
-      dateAdded
+      date
+      amPrice
+      pmPrice
     }
   }
 `;
@@ -21,8 +22,9 @@ export const updateTurnipPrice = /* GraphQL */ `
   ) {
     updateTurnipPrice(input: $input, condition: $condition) {
       id
-      price
-      dateAdded
+      date
+      amPrice
+      pmPrice
     }
   }
 `;
@@ -33,8 +35,9 @@ export const deleteTurnipPrice = /* GraphQL */ `
   ) {
     deleteTurnipPrice(input: $input, condition: $condition) {
       id
-      price
-      dateAdded
+      date
+      amPrice
+      pmPrice
     }
   }
 `;

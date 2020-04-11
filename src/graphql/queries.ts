@@ -6,8 +6,9 @@ export const getTurnipPrice = /* GraphQL */ `
   query GetTurnipPrice($id: ID!) {
     getTurnipPrice(id: $id) {
       id
-      price
-      dateAdded
+      date
+      amPrice
+      pmPrice
     }
   }
 `;
@@ -20,8 +21,9 @@ export const listTurnipPrices = /* GraphQL */ `
     listTurnipPrices(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        price
-        dateAdded
+        date
+        amPrice
+        pmPrice
       }
       nextToken
     }

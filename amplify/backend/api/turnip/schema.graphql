@@ -1,5 +1,6 @@
 type TurnipPrice @model {
   id: ID!
-  price: Int!
-  dateAdded: AWSDateTime!
+  date: AWSDateTime!
+  amPrice: Int
+  pmPrice: Int
 }

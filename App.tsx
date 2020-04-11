@@ -1,11 +1,8 @@
 import React, { useEffect, useState } from "react";
-import {
-  View,
-  ScrollView,
-  StatusBar,
-} from "react-native";
+import { View, ScrollView, StatusBar } from "react-native";
 import {
   Appbar,
+  Switch,
   Card,
   Dialog,
   Portal,
@@ -13,6 +10,9 @@ import {
   TextInput,
   IconButton,
   FAB,
+  Chip,
+  Text,
+  useTheme,
 } from "react-native-paper";
 import { withAuthenticator } from "aws-amplify-react-native";
 import Amplify, { Auth } from "aws-amplify";
@@ -25,16 +25,41 @@ import config from "./aws-exports";
 
 Amplify.configure(config);
 
+function getDayOfWeek(date: Date) {
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+
+  return days[date.getDay()];
+}
+
+function formatDate(date: Date) {
+  const month = date.getMonth();
+  const day = date.getDate();
+  const year = date.getFullYear();
+
+  return `${month}/${day}/${year}`;
+}
+
 interface ITurnipPrice {
   id?: string;
-  price: number;
-  dateAdded: Date;
+  date: Date;
+  amPrice: number;
+  pmPrice: number;
 }
 
 const TurnipPriceList: React.FC<{
   turnipPrices: ITurnipPrice[];
   deleteTurnipPrice: (newTurnipPrice: ITurnipPrice) => Promise<any>;
 }> = ({ deleteTurnipPrice, turnipPrices }) => {
+  const theme = useTheme();
+
   return (
     <ScrollView>
       {turnipPrices.map((turnipPrice, index) => (
@@ -43,8 +68,8 @@ const TurnipPriceList: React.FC<{
           key={turnipPrice.id ? turnipPrice.id : index}
         >
           <Card.Title
-            title={`${turnipPrice.price} Bells`}
-            subtitle={new Date(turnipPrice.dateAdded).toISOString()}
+            title={getDayOfWeek(new Date(turnipPrice.date))}
+            subtitle={formatDate(new Date(turnipPrice.date))}
             right={(props) => (
               <IconButton
                 {...props}
@@ -55,6 +80,27 @@ const TurnipPriceList: React.FC<{
               />
             )}
           />
+          <Card.Content>
+            <View
+              style={{ justifyContent: "space-around", flexDirection: "row" }}
+            >
+              <Chip
+                icon={() => (
+                  <Text style={{ color: theme.colors.accent }}>AM</Text>
+                )}
+              >
+                <Text>{`${turnipPrice.amPrice} Bells`}</Text>
+              </Chip>
+
+              <Chip
+                icon={() => (
+                  <Text style={{ color: theme.colors.accent }}>PM</Text>
+                )}
+              >
+                <Text>{`${turnipPrice.pmPrice} Bells`}</Text>
+              </Chip>
+            </View>
+          </Card.Content>
         </Card>
       ))}
     </ScrollView>
@@ -67,16 +113,21 @@ const AddTurnipPriceForm: React.FC<{
   addTurnipPrice: (newTurnipPrice: ITurnipPrice) => Promise<any>;
 }> = ({ addTurnipPrice, isShowingAddForm, setIsShowingAddForm }) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [price, setPrice] = useState<number | undefined>();
+  const [amPrice, setAmPrice] = useState<number>(0);
+  const [pmPrice, setPmPrice] = useState<number>(0);
   const [date] = useState(new Date());
 
+  const theme = useTheme();
+
   async function handleSubmit() {
-    if (price) {
+    if (amPrice && pmPrice) {
       setIsLoading(true);
       try {
-        await addTurnipPrice({ price, dateAdded: date });
+        await addTurnipPrice({ amPrice, pmPrice, date });
+
         setIsShowingAddForm(false);
-        setPrice(undefined);
+        setAmPrice(0);
+        setPmPrice(0);
       } catch (err) {
         console.log("error creating turnip price:", err);
       } finally {
@@ -96,23 +147,35 @@ const AddTurnipPriceForm: React.FC<{
           <TextInput
             keyboardType={"numeric"}
             onChangeText={(val) => {
-              setPrice(Number(val));
+              const price = Number(val);
+              setAmPrice(price);
             }}
             textContentType={"oneTimeCode"}
-            value={price ? String(price) : undefined}
-            placeholder="Price"
+            value={amPrice !== 0 ? String(amPrice) : undefined}
+            placeholder="AM Price"
+          />
+          <TextInput
+            keyboardType={"numeric"}
+            onChangeText={(val) => {
+              const price = Number(val);
+
+              setPmPrice(price);
+            }}
+            textContentType={"oneTimeCode"}
+            value={pmPrice !== 0 ? String(pmPrice) : undefined}
+            placeholder="PM Price"
           />
         </Dialog.Content>
         <Dialog.Actions>
           <Button
-            color={"red"}
+            color={theme.colors.error}
             disabled={isLoading}
             onPress={() => setIsShowingAddForm(false)}
           >
             Cancel
           </Button>
           <Button
-            disabled={price === undefined}
+            disabled={amPrice === undefined && pmPrice === undefined}
             icon={"plus"}
             loading={isLoading}
             onPress={() => handleSubmit()}
@@ -128,6 +191,8 @@ const AddTurnipPriceForm: React.FC<{
 const App: React.FC = () => {
   const [turnipPrices, setTurnipPrices] = useState<ITurnipPrice[]>([]);
   const [isShowingAddForm, setIsShowingAddForm] = useState(false);
+
+  const theme = useTheme();
 
   useEffect(() => {
     fetchTurnipPrices();
@@ -171,7 +236,6 @@ const App: React.FC = () => {
   async function signOut() {
     try {
       await Auth.signOut();
-      console.log('success')
     } catch (error) {
       console.log("error signing out: ", error);
     }
@@ -195,7 +259,7 @@ const App: React.FC = () => {
       />
       <View
         style={{
-          backgroundColor: "#EEEEEE",
+          backgroundColor: theme.colors.background,
           padding: 18,
           flex: 1,
         }}
@@ -207,7 +271,7 @@ const App: React.FC = () => {
         <FAB
           style={{
             position: "absolute",
-            margin: 16,
+            margin: 18,
             right: 0,
             bottom: 0,
           }}

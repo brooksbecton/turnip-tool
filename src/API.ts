@@ -4,43 +4,19 @@
 
 export type CreateTurnipPriceInput = {
   id?: string | null,
-  price: number,
-  dateAdded: string,
+  date: string,
+  amPrice?: number | null,
+  pmPrice?: number | null,
 };
 
 export type ModelTurnipPriceConditionInput = {
-  price?: ModelIntInput | null,
-  dateAdded?: ModelStringInput | null,
+  date?: ModelStringInput | null,
+  amPrice?: ModelIntInput | null,
+  pmPrice?: ModelIntInput | null,
   and?: Array< ModelTurnipPriceConditionInput | null > | null,
   or?: Array< ModelTurnipPriceConditionInput | null > | null,
   not?: ModelTurnipPriceConditionInput | null,
 };
-
-export type ModelIntInput = {
-  ne?: number | null,
-  eq?: number | null,
-  le?: number | null,
-  lt?: number | null,
-  ge?: number | null,
-  gt?: number | null,
-  between?: Array< number | null > | null,
-  attributeExists?: boolean | null,
-  attributeType?: ModelAttributeTypes | null,
-};
-
-export enum ModelAttributeTypes {
-  binary = "binary",
-  binarySet = "binarySet",
-  bool = "bool",
-  list = "list",
-  map = "map",
-  number = "number",
-  numberSet = "numberSet",
-  string = "string",
-  stringSet = "stringSet",
-  _null = "_null",
-}
-
 
 export type ModelStringInput = {
   ne?: string | null,
@@ -58,6 +34,20 @@ export type ModelStringInput = {
   size?: ModelSizeInput | null,
 };
 
+export enum ModelAttributeTypes {
+  binary = "binary",
+  binarySet = "binarySet",
+  bool = "bool",
+  list = "list",
+  map = "map",
+  number = "number",
+  numberSet = "numberSet",
+  string = "string",
+  stringSet = "stringSet",
+  _null = "_null",
+}
+
+
 export type ModelSizeInput = {
   ne?: number | null,
   eq?: number | null,
@@ -68,10 +58,23 @@ export type ModelSizeInput = {
   between?: Array< number | null > | null,
 };
 
+export type ModelIntInput = {
+  ne?: number | null,
+  eq?: number | null,
+  le?: number | null,
+  lt?: number | null,
+  ge?: number | null,
+  gt?: number | null,
+  between?: Array< number | null > | null,
+  attributeExists?: boolean | null,
+  attributeType?: ModelAttributeTypes | null,
+};
+
 export type UpdateTurnipPriceInput = {
   id: string,
-  price?: number | null,
-  dateAdded?: string | null,
+  date?: string | null,
+  amPrice?: number | null,
+  pmPrice?: number | null,
 };
 
 export type DeleteTurnipPriceInput = {
@@ -80,8 +83,9 @@ export type DeleteTurnipPriceInput = {
 
 export type ModelTurnipPriceFilterInput = {
   id?: ModelIDInput | null,
-  price?: ModelIntInput | null,
-  dateAdded?: ModelStringInput | null,
+  date?: ModelStringInput | null,
+  amPrice?: ModelIntInput | null,
+  pmPrice?: ModelIntInput | null,
   and?: Array< ModelTurnipPriceFilterInput | null > | null,
   or?: Array< ModelTurnipPriceFilterInput | null > | null,
   not?: ModelTurnipPriceFilterInput | null,
@@ -112,8 +116,9 @@ export type CreateTurnipPriceMutation = {
   createTurnipPrice:  {
     __typename: "TurnipPrice",
     id: string,
-    price: number,
-    dateAdded: string,
+    date: string,
+    amPrice: number | null,
+    pmPrice: number | null,
   } | null,
 };
 
@@ -126,8 +131,9 @@ export type UpdateTurnipPriceMutation = {
   updateTurnipPrice:  {
     __typename: "TurnipPrice",
     id: string,
-    price: number,
-    dateAdded: string,
+    date: string,
+    amPrice: number | null,
+    pmPrice: number | null,
   } | null,
 };
 
@@ -140,8 +146,9 @@ export type DeleteTurnipPriceMutation = {
   deleteTurnipPrice:  {
     __typename: "TurnipPrice",
     id: string,
-    price: number,
-    dateAdded: string,
+    date: string,
+    amPrice: number | null,
+    pmPrice: number | null,
   } | null,
 };
 
@@ -153,8 +160,9 @@ export type GetTurnipPriceQuery = {
   getTurnipPrice:  {
     __typename: "TurnipPrice",
     id: string,
-    price: number,
-    dateAdded: string,
+    date: string,
+    amPrice: number | null,
+    pmPrice: number | null,
   } | null,
 };
 
@@ -170,8 +178,9 @@ export type ListTurnipPricesQuery = {
     items:  Array< {
       __typename: "TurnipPrice",
       id: string,
-      price: number,
-      dateAdded: string,
+      date: string,
+      amPrice: number | null,
+      pmPrice: number | null,
     } | null > | null,
     nextToken: string | null,
   } | null,
@@ -181,8 +190,9 @@ export type OnCreateTurnipPriceSubscription = {
   onCreateTurnipPrice:  {
     __typename: "TurnipPrice",
     id: string,
-    price: number,
-    dateAdded: string,
+    date: string,
+    amPrice: number | null,
+    pmPrice: number | null,
   } | null,
 };
 
@@ -190,8 +200,9 @@ export type OnUpdateTurnipPriceSubscription = {
   onUpdateTurnipPrice:  {
     __typename: "TurnipPrice",
     id: string,
-    price: number,
-    dateAdded: string,
+    date: string,
+    amPrice: number | null,
+    pmPrice: number | null,
   } | null,
 };
 
@@ -199,7 +210,8 @@ export type OnDeleteTurnipPriceSubscription = {
   onDeleteTurnipPrice:  {
     __typename: "TurnipPrice",
     id: string,
-    price: number,
-    dateAdded: string,
+    date: string,
+    amPrice: number | null,
+    pmPrice: number | null,
   } | null,
 };
