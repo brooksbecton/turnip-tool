@@ -5,8 +5,10 @@ import {
   deleteTurnipPrice as deleteTurnipPriceMut,
   updateTurnipPrice as updateTurnipPriceMut,
   createSundayTurnip as createSundayTurnipMut,
+  deleteSundayTurnip as deleteSundayTurnipMut,
+  updateSundayTurnip as updateSundayTurnipMut,
 } from "./graphql/mutations";
-import { listTurnipPrices } from "./graphql/queries";
+import { listTurnipPrices, listSundayTurnips } from "./graphql/queries";
 import { ISellPrice, IBuyPrice } from "./types";
 
 export function getDayOfWeek(date: Date) {
@@ -31,6 +33,12 @@ export function formatDate(date: Date) {
   return `${month}/${day}/${year}`;
 }
 
+export function isSellPrice(
+  price: IBuyPrice | ISellPrice
+): price is ISellPrice {
+  return (price as ISellPrice).amPrice !== undefined;
+}
+
 // Sell
 
 export async function addSellPrice(
@@ -43,7 +51,7 @@ export async function addSellPrice(
   return data.data.createTurnipPrice;
 }
 
-export async function deleteTurnipPrice(newTurnipPrice: ISellPrice) {
+export async function deleteSellPrice(newTurnipPrice: ISellPrice) {
   try {
     await API.graphql(
       graphqlOperation(deleteTurnipPriceMut, {
@@ -67,6 +75,51 @@ export async function updateTurnipPrice(newTurnipPrice: ISellPrice) {
     );
     //@ts-ignore
     return turnipData.data.updateTurnipPrice;
+  } catch (err) {
+    console.log("error updating turnipPrices", err);
+  }
+}
+
+// Buy
+
+export async function addBuyPrice(buyPrice: IBuyPrice) {
+  try {
+    const data = await API.graphql(
+      graphqlOperation(createSundayTurnipMut, { input: buyPrice })
+    );
+    console.log(data)
+    //@ts-ignore
+    return data.data.createSundayTurnip;
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+export async function deleteBuyPrice(buyPrice: IBuyPrice) {
+  try {
+    await API.graphql(
+      graphqlOperation(deleteSundayTurnipMut, {
+        input: { id: buyPrice.id },
+      })
+    );
+  } catch (err) {
+    console.log("error deleting turnip price:", err);
+  }
+}
+
+export async function getBuyPrices() {
+  const turnipData = await API.graphql(graphqlOperation(listSundayTurnips));
+  //@ts-ignore
+  return turnipData.data.listSundayTurnips.items;
+}
+
+export async function updateBuyPrice(buyPrice: IBuyPrice) {
+  try {
+    const turnipData = await API.graphql(
+      graphqlOperation(updateSundayTurnipMut, { input: buyPrice })
+    );
+    //@ts-ignore
+    return turnipData.data.updateSundayTurnip;
   } catch (err) {
     console.log("error updating turnipPrices", err);
   }

@@ -2,13 +2,13 @@ import React from "react";
 import { View, ScrollView } from "react-native";
 import { Card, IconButton, Chip, Text, useTheme } from "react-native-paper";
 
-import { ISellPrice } from "./types";
-import { getDayOfWeek, formatDate } from "./utils";
+import { ISellPrice, IBuyPrice } from "./types";
+import { getDayOfWeek, formatDate, isSellPrice } from "./utils";
 
 interface IProps {
-  turnipPrices: ISellPrice[];
-  deleteTurnipPrice: (newTurnipPrice: ISellPrice) => void;
-  onCardPress: (newTurnipPrice: ISellPrice) => void;
+  turnipPrices: Array<ISellPrice | IBuyPrice>;
+  deleteTurnipPrice: (newTurnipPrice: ISellPrice | IBuyPrice) => void;
+  onCardPress: (newTurnipPrice: ISellPrice | IBuyPrice) => void;
 }
 
 export const TurnipPriceList: React.FC<IProps> = ({
@@ -17,6 +17,23 @@ export const TurnipPriceList: React.FC<IProps> = ({
   turnipPrices,
 }) => {
   const theme = useTheme();
+
+  const BuyContent = ({ price }: { price: IBuyPrice }) => (
+    <Chip>
+      <Text>{`${price.price} Bells`}</Text>
+    </Chip>
+  );
+  const SellContent = ({ price }: { price: ISellPrice }) => (
+    <>
+      <Chip icon={() => <Text style={{ color: theme.colors.accent }}>AM</Text>}>
+        <Text>{`${price.amPrice} Bells`}</Text>
+      </Chip>
+
+      <Chip icon={() => <Text style={{ color: theme.colors.accent }}>PM</Text>}>
+        <Text>{`${price.pmPrice} Bells`}</Text>
+      </Chip>
+    </>
+  );
 
   return (
     <ScrollView>
@@ -45,21 +62,11 @@ export const TurnipPriceList: React.FC<IProps> = ({
             <View
               style={{ justifyContent: "space-around", flexDirection: "row" }}
             >
-              <Chip
-                icon={() => (
-                  <Text style={{ color: theme.colors.accent }}>AM</Text>
-                )}
-              >
-                <Text>{`${turnipPrice.amPrice} Bells`}</Text>
-              </Chip>
-
-              <Chip
-                icon={() => (
-                  <Text style={{ color: theme.colors.accent }}>PM</Text>
-                )}
-              >
-                <Text>{`${turnipPrice.pmPrice} Bells`}</Text>
-              </Chip>
+              {isSellPrice(turnipPrice) ? (
+                <SellContent price={turnipPrice as ISellPrice} />
+              ) : (
+                <BuyContent price={turnipPrice as IBuyPrice} />
+              )}
             </View>
           </Card.Content>
         </Card>
