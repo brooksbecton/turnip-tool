@@ -32,3 +32,30 @@ export const onDeleteTurnipPrice = /* GraphQL */ `
     }
   }
 `;
+export const onCreateSundayTurnip = /* GraphQL */ `
+  subscription OnCreateSundayTurnip {
+    onCreateSundayTurnip {
+      id
+      date
+      price
+    }
+  }
+`;
+export const onUpdateSundayTurnip = /* GraphQL */ `
+  subscription OnUpdateSundayTurnip {
+    onUpdateSundayTurnip {
+      id
+      date
+      price
+    }
+  }
+`;
+export const onDeleteSundayTurnip = /* GraphQL */ `
+  subscription OnDeleteSundayTurnip {
+    onDeleteSundayTurnip {
+      id
+      date
+      price
+    }
+  }
+`;

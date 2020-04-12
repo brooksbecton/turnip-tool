@@ -1,113 +1,78 @@
 import React, { useEffect, useState } from "react";
 import { View, StatusBar } from "react-native";
-import { DefaultTheme, Appbar, FAB, useTheme } from "react-native-paper";
+import {
+  DefaultTheme,
+  Appbar,
+  FAB,
+  useTheme,
+  Portal,
+} from "react-native-paper";
 import { withAuthenticator } from "aws-amplify-react-native";
 import Amplify, { Auth } from "aws-amplify";
 import { Provider as PaperProvider } from "react-native-paper";
-import { API, graphqlOperation } from "aws-amplify";
 
-import { ITurnipPrice } from "./src/types";
+import { ISellPrice } from "./src/types";
+import {
+  addSellPrice,
+  getSellPrices,
+  updateTurnipPrice,
+  deleteTurnipPrice,
+} from "./src/utils";
 import { AddTurnipPriceForm } from "./src/AddTurnipPriceForm";
 import { TurnipPriceList } from "./src/TurnipPriceList";
-import {
-  createTurnipPrice,
-  deleteTurnipPrice,
-  updateTurnipPrice,
-} from "./src/graphql/mutations";
-import { listTurnipPrices } from "./src/graphql/queries";
 import config from "./aws-exports";
+import { AddBuyPriceForm } from "./src/AddBuyPrice";
 
 Amplify.configure(config);
 
 const App: React.FC = () => {
-  const [turnipPrices, setTurnipPrices] = useState<ITurnipPrice[]>([]);
+  const [sellPrices, setSellPrices] = useState<ISellPrice[]>([]);
   const [isShowingAddForm, setIsShowingAddForm] = useState(false);
+  const [isShowingBuyForm, setIsShowingBuyForm] = useState(false);
   const [defaultTurnipPrice, setDefaultTurnipPrice] = useState<
-    ITurnipPrice | undefined
+    ISellPrice | undefined
   >();
+  const [isFabOpen, setIsFabOpen] = useState(false);
   const theme = useTheme();
 
   useEffect(() => {
-    fetchTurnipPrices();
+    getSellPrices().then((newSellPrices) => {
+      setSellPrices(newSellPrices);
+    });
   }, []);
 
-  async function addTurnipPrice(newTurnipPrice: ITurnipPrice) {
-    try {
-      const data = await API.graphql(
-        graphqlOperation(createTurnipPrice, { input: newTurnipPrice })
-      );
-      //@ts-ignore
-      const p = data.data.createTurnipPrice;
-      setTurnipPrices([p, ...turnipPrices]);
-    } catch (err) {
-      console.log("error creating turnip price:", err);
-    }
-  }
-  async function fetchDeleteTurnipPrice(newTurnipPrice: ITurnipPrice) {
-    try {
-      await API.graphql(
-        graphqlOperation(deleteTurnipPrice, {
-          input: { id: newTurnipPrice.id },
-        })
-      );
-      setTurnipPrices(turnipPrices.filter((tP) => tP.id !== newTurnipPrice.id));
-    } catch (err) {
-      console.log("error deleting turnip price:", err);
-    }
-  }
-  async function fetchTurnipPrices() {
-    try {
-      const turnipData = await API.graphql(graphqlOperation(listTurnipPrices));
-      //@ts-ignore
-      const turnipPrices = turnipData.data.listTurnipPrices.items;
-      setTurnipPrices(turnipPrices);
-    } catch (err) {
-      console.log("error fetching turnipPrices");
-    }
-  }
-  async function fetchUpdateTurnipPrice(newTurnipPrice: ITurnipPrice) {
-    try {
-      const turnipData = await API.graphql(
-        graphqlOperation(updateTurnipPrice, { input: newTurnipPrice })
-      );
-      //@ts-ignore
-      const updatedTurnipPrice = turnipData.data.updateTurnipPrice;
-      const updatedTurnipPrices = turnipPrices.map((tP) => {
-        if (tP.id === updatedTurnipPrice.id) {
-          return updatedTurnipPrice;
+  async function handleSellFormSubmit(turnipPrice: ISellPrice) {
+    if (turnipPrice.id) {
+      const updatedSellPrice = await updateTurnipPrice(turnipPrice);
+      const updatedSellPrices = sellPrices.map((tP) => {
+        if (tP.id === updatedSellPrice.id) {
+          return updatedSellPrice;
         } else {
           return tP;
         }
       });
-      setTurnipPrices(updatedTurnipPrices);
-    } catch (err) {
-      console.log("error updating turnipPrices", err);
-    }
-  }
-  async function signOut() {
-    try {
-      await Auth.signOut();
-    } catch (error) {
-      console.log("error signing out: ", error);
-    }
-  }
-  function handleFormSubmit(turnipPrice: ITurnipPrice) {
-    if (turnipPrice.id) {
-      fetchUpdateTurnipPrice(turnipPrice);
+      setSellPrices(updatedSellPrices);
     } else {
-      addTurnipPrice(turnipPrice);
+      const newSellPrice = await addSellPrice(turnipPrice);
+
+      setSellPrices([newSellPrice, ...sellPrices]);
     }
   }
 
-  function handleFormClose() {
+  function handleSellFormClose() {
     setDefaultTurnipPrice({ amPrice: 0, pmPrice: 0, date: new Date() });
   }
 
-  function handleCardPress(turnipPrice: ITurnipPrice) {
+  function handleCardPress(turnipPrice: ISellPrice) {
     setDefaultTurnipPrice(turnipPrice);
     setIsShowingAddForm(true);
   }
 
+  function handleDelete(sellPrice: ISellPrice) {
+    deleteTurnipPrice(sellPrice);
+
+    setSellPrices(sellPrices.filter((sP) => sP.id !== sellPrice.id));
+  }
   const defaultTheme = {
     ...DefaultTheme,
     roundness: 8,
@@ -124,16 +89,22 @@ const App: React.FC = () => {
         <Appbar.Action
           icon="logout"
           onPress={() => {
-            signOut();
+            Auth.signOut();
           }}
         />
       </Appbar>
       <AddTurnipPriceForm
         defaultTurnipPrice={defaultTurnipPrice}
-        handleFormSubmit={handleFormSubmit}
-        handleFormClose={handleFormClose}
+        handleFormSubmit={handleSellFormSubmit}
+        handleFormClose={handleSellFormClose}
         setIsShowingAddForm={setIsShowingAddForm}
         isShowingAddForm={isShowingAddForm}
+      />
+      <AddBuyPriceForm
+        handleFormSubmit={() => {}}
+        handleFormClose={() => {}}
+        setIsShowing={setIsShowingBuyForm}
+        isShowing={isShowingBuyForm}
       />
       <View
         style={{
@@ -144,24 +115,43 @@ const App: React.FC = () => {
       >
         <TurnipPriceList
           onCardPress={handleCardPress}
-          deleteTurnipPrice={fetchDeleteTurnipPrice}
-          turnipPrices={turnipPrices}
+          deleteTurnipPrice={handleDelete}
+          turnipPrices={sellPrices}
         />
-        <FAB
-          style={{
-            position: "absolute",
-            margin: 18,
-            right: 0,
-            bottom: 0,
-          }}
-          icon="plus"
-          onPress={() => {
-            setIsShowingAddForm(true);
-          }}
-        />
+
+        <Portal>
+          <FAB.Group
+            visible={true}
+            open={isFabOpen}
+            onPress={() => setIsFabOpen(!isFabOpen)}
+            onStateChange={() => {}}
+            icon={isFabOpen ? "bell" : "plus"}
+            actions={[
+              {
+                icon: "food-apple",
+                label: "Add Turnip Buy Price",
+
+                onPress: () => {
+                  setIsShowingBuyForm(true);
+                  setIsFabOpen(false);
+                },
+              },
+              {
+                icon: "account-supervisor",
+                label: "Add Sell Price",
+                onPress: () => {
+                  setIsShowingAddForm(true);
+                  setIsFabOpen(false);
+                },
+              },
+            ]}
+          />
+        </Portal>
       </View>
     </PaperProvider>
   );
 };
+
+console.disableYellowBox = true;
 
 export default withAuthenticator(App);

@@ -41,3 +41,39 @@ export const deleteTurnipPrice = /* GraphQL */ `
     }
   }
 `;
+export const createSundayTurnip = /* GraphQL */ `
+  mutation CreateSundayTurnip(
+    $input: CreateSundayTurnipInput!
+    $condition: ModelSundayTurnipConditionInput
+  ) {
+    createSundayTurnip(input: $input, condition: $condition) {
+      id
+      date
+      price
+    }
+  }
+`;
+export const updateSundayTurnip = /* GraphQL */ `
+  mutation UpdateSundayTurnip(
+    $input: UpdateSundayTurnipInput!
+    $condition: ModelSundayTurnipConditionInput
+  ) {
+    updateSundayTurnip(input: $input, condition: $condition) {
+      id
+      date
+      price
+    }
+  }
+`;
+export const deleteSundayTurnip = /* GraphQL */ `
+  mutation DeleteSundayTurnip(
+    $input: DeleteSundayTurnipInput!
+    $condition: ModelSundayTurnipConditionInput
+  ) {
+    deleteSundayTurnip(input: $input, condition: $condition) {
+      id
+      date
+      price
+    }
+  }
+`;

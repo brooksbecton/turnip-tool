@@ -2,13 +2,13 @@ import React from "react";
 import { View, ScrollView } from "react-native";
 import { Card, IconButton, Chip, Text, useTheme } from "react-native-paper";
 
-import { ITurnipPrice } from "./types";
+import { ISellPrice } from "./types";
 import { getDayOfWeek, formatDate } from "./utils";
 
 interface IProps {
-  turnipPrices: ITurnipPrice[];
-  deleteTurnipPrice: (newTurnipPrice: ITurnipPrice) => Promise<any>;
-  onCardPress: (newTurnipPrice: ITurnipPrice) => void;
+  turnipPrices: ISellPrice[];
+  deleteTurnipPrice: (newTurnipPrice: ISellPrice) => void;
+  onCardPress: (newTurnipPrice: ISellPrice) => void;
 }
 
 export const TurnipPriceList: React.FC<IProps> = ({

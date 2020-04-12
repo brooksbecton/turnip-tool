@@ -29,3 +29,28 @@ export const listTurnipPrices = /* GraphQL */ `
     }
   }
 `;
+export const getSundayTurnip = /* GraphQL */ `
+  query GetSundayTurnip($id: ID!) {
+    getSundayTurnip(id: $id) {
+      id
+      date
+      price
+    }
+  }
+`;
+export const listSundayTurnips = /* GraphQL */ `
+  query ListSundayTurnips(
+    $filter: ModelSundayTurnipFilterInput
+    $limit: Int
+    $nextToken: String
+  ) {
+    listSundayTurnips(filter: $filter, limit: $limit, nextToken: $nextToken) {
+      items {
+        id
+        date
+        price
+      }
+      nextToken
+    }
+  }
+`;

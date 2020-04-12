@@ -81,6 +81,30 @@ export type DeleteTurnipPriceInput = {
   id?: string | null,
 };
 
+export type CreateSundayTurnipInput = {
+  id?: string | null,
+  date: string,
+  price?: number | null,
+};
+
+export type ModelSundayTurnipConditionInput = {
+  date?: ModelStringInput | null,
+  price?: ModelIntInput | null,
+  and?: Array< ModelSundayTurnipConditionInput | null > | null,
+  or?: Array< ModelSundayTurnipConditionInput | null > | null,
+  not?: ModelSundayTurnipConditionInput | null,
+};
+
+export type UpdateSundayTurnipInput = {
+  id: string,
+  date?: string | null,
+  price?: number | null,
+};
+
+export type DeleteSundayTurnipInput = {
+  id?: string | null,
+};
+
 export type ModelTurnipPriceFilterInput = {
   id?: ModelIDInput | null,
   date?: ModelStringInput | null,
@@ -105,6 +129,15 @@ export type ModelIDInput = {
   attributeExists?: boolean | null,
   attributeType?: ModelAttributeTypes | null,
   size?: ModelSizeInput | null,
+};
+
+export type ModelSundayTurnipFilterInput = {
+  id?: ModelIDInput | null,
+  date?: ModelStringInput | null,
+  price?: ModelIntInput | null,
+  and?: Array< ModelSundayTurnipFilterInput | null > | null,
+  or?: Array< ModelSundayTurnipFilterInput | null > | null,
+  not?: ModelSundayTurnipFilterInput | null,
 };
 
 export type CreateTurnipPriceMutationVariables = {
@@ -152,6 +185,48 @@ export type DeleteTurnipPriceMutation = {
   } | null,
 };
 
+export type CreateSundayTurnipMutationVariables = {
+  input: CreateSundayTurnipInput,
+  condition?: ModelSundayTurnipConditionInput | null,
+};
+
+export type CreateSundayTurnipMutation = {
+  createSundayTurnip:  {
+    __typename: "SundayTurnip",
+    id: string,
+    date: string,
+    price: number | null,
+  } | null,
+};
+
+export type UpdateSundayTurnipMutationVariables = {
+  input: UpdateSundayTurnipInput,
+  condition?: ModelSundayTurnipConditionInput | null,
+};
+
+export type UpdateSundayTurnipMutation = {
+  updateSundayTurnip:  {
+    __typename: "SundayTurnip",
+    id: string,
+    date: string,
+    price: number | null,
+  } | null,
+};
+
+export type DeleteSundayTurnipMutationVariables = {
+  input: DeleteSundayTurnipInput,
+  condition?: ModelSundayTurnipConditionInput | null,
+};
+
+export type DeleteSundayTurnipMutation = {
+  deleteSundayTurnip:  {
+    __typename: "SundayTurnip",
+    id: string,
+    date: string,
+    price: number | null,
+  } | null,
+};
+
 export type GetTurnipPriceQueryVariables = {
   id: string,
 };
@@ -186,6 +261,38 @@ export type ListTurnipPricesQuery = {
   } | null,
 };
 
+export type GetSundayTurnipQueryVariables = {
+  id: string,
+};
+
+export type GetSundayTurnipQuery = {
+  getSundayTurnip:  {
+    __typename: "SundayTurnip",
+    id: string,
+    date: string,
+    price: number | null,
+  } | null,
+};
+
+export type ListSundayTurnipsQueryVariables = {
+  filter?: ModelSundayTurnipFilterInput | null,
+  limit?: number | null,
+  nextToken?: string | null,
+};
+
+export type ListSundayTurnipsQuery = {
+  listSundayTurnips:  {
+    __typename: "ModelSundayTurnipConnection",
+    items:  Array< {
+      __typename: "SundayTurnip",
+      id: string,
+      date: string,
+      price: number | null,
+    } | null > | null,
+    nextToken: string | null,
+  } | null,
+};
+
 export type OnCreateTurnipPriceSubscription = {
   onCreateTurnipPrice:  {
     __typename: "TurnipPrice",
@@ -213,5 +320,32 @@ export type OnDeleteTurnipPriceSubscription = {
     date: string,
     amPrice: number | null,
     pmPrice: number | null,
+  } | null,
+};
+
+export type OnCreateSundayTurnipSubscription = {
+  onCreateSundayTurnip:  {
+    __typename: "SundayTurnip",
+    id: string,
+    date: string,
+    price: number | null,
+  } | null,
+};
+
+export type OnUpdateSundayTurnipSubscription = {
+  onUpdateSundayTurnip:  {
+    __typename: "SundayTurnip",
+    id: string,
+    date: string,
+    price: number | null,
+  } | null,
+};
+
+export type OnDeleteSundayTurnipSubscription = {
+  onDeleteSundayTurnip:  {
+    __typename: "SundayTurnip",
+    id: string,
+    date: string,
+    price: number | null,
   } | null,
 };
