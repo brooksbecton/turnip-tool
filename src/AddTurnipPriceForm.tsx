@@ -33,6 +33,7 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
   const theme = useTheme();
   useEffect(() => {
     if (isShowingAddForm === false) {
+      reset()
       handleFormClose();
     }
   }, [isShowingAddForm]);
@@ -107,7 +108,6 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
             Cancel
           </Button>
           <Button
-            disabled={amPrice === undefined && pmPrice === undefined}
             icon={"plus"}
             loading={isLoading}
             onPress={() => handleSubmit()}

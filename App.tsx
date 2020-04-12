@@ -33,10 +33,12 @@ const App: React.FC = () => {
 
   async function addTurnipPrice(newTurnipPrice: ITurnipPrice) {
     try {
-      await API.graphql(
+      const data = await API.graphql(
         graphqlOperation(createTurnipPrice, { input: newTurnipPrice })
       );
-      setTurnipPrices([newTurnipPrice, ...turnipPrices]);
+      //@ts-ignore
+      const p = data.data.createTurnipPrice;
+      setTurnipPrices([p, ...turnipPrices]);
     } catch (err) {
       console.log("error creating turnip price:", err);
     }
@@ -82,7 +84,6 @@ const App: React.FC = () => {
       console.log("error updating turnipPrices", err);
     }
   }
-
   async function signOut() {
     try {
       await Auth.signOut();
@@ -90,7 +91,6 @@ const App: React.FC = () => {
       console.log("error signing out: ", error);
     }
   }
-
   function handleFormSubmit(turnipPrice: ITurnipPrice) {
     if (turnipPrice.id) {
       fetchUpdateTurnipPrice(turnipPrice);
