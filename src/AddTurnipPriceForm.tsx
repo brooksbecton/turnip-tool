@@ -6,6 +6,7 @@ import {
   TextInput,
   useTheme,
 } from "react-native-paper";
+import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { ITurnipPrice } from "./types";
 
@@ -31,9 +32,10 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
   const [date, setDate] = useState(new Date());
 
   const theme = useTheme();
+
   useEffect(() => {
     if (isShowingAddForm === false) {
-      reset()
+      reset();
       handleFormClose();
     }
   }, [isShowingAddForm]);
@@ -43,7 +45,7 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
       setId(defaultTurnipPrice.id || "");
       setAmPrice(defaultTurnipPrice.amPrice);
       setPmPrice(defaultTurnipPrice.pmPrice);
-      setDate(defaultTurnipPrice.date);
+      setDate(new Date(defaultTurnipPrice.date));
     }
   }, [defaultTurnipPrice, isShowingAddForm]);
 
@@ -97,6 +99,15 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
             value={pmPrice !== 0 ? String(pmPrice) : undefined}
             placeholder="PM Price"
             label="PM Price"
+          />
+
+          <DateTimePicker
+            value={date}
+            onChange={(event, newDate) => {
+              if (newDate) {
+                setDate(newDate);
+              }
+            }}
           />
         </Dialog.Content>
         <Dialog.Actions>
