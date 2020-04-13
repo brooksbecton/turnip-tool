@@ -48,7 +48,7 @@ export const TurnipPriceList: React.FC<IProps> = ({
     buyPrices: IBuyPrice[];
   }) => {
     const lastSundayPrice = getLastSundayPrice(price, buyPrices as IBuyPrice[]);
-    console.log(lastSundayPrice)
+    console.log(lastSundayPrice);
     const amPriceDiff = lastSundayPrice?.price
       ? price.amPrice - lastSundayPrice?.price
       : 0;
@@ -57,35 +57,53 @@ export const TurnipPriceList: React.FC<IProps> = ({
       : 0;
     return (
       <>
-        <Chip
-          icon={() => (
-            <Text
-              style={{
-                color:
-                  amPriceDiff >= 0 ? theme.colors.accent : theme.colors.error,
-              }}
-            >
-              {`(${amPriceDiff})`}
-            </Text>
-          )}
+        <View
+          style={{
+            flexDirection: "column",
+            alignItems: "center",
+          }}
         >
-          <Text>{`AM ${price.amPrice} Bells`}</Text>
-        </Chip>
+          <Text>AM</Text>
 
-        <Chip
-          icon={() => (
-            <Text
-              style={{
-                color:
-                  pmPriceDiff >= 0 ? theme.colors.accent : theme.colors.error,
-              }}
-            >
-              {`(${pmPriceDiff})`}
-            </Text>
-          )}
+          <Chip
+            icon={() => (
+              <Text
+                style={{
+                  color:
+                    amPriceDiff >= 0 ? theme.colors.accent : theme.colors.error,
+                }}
+              >
+                {`(${amPriceDiff})`}
+              </Text>
+            )}
+          >
+            <Text>{`${price.amPrice} Bells`}</Text>
+          </Chip>
+        </View>
+
+        <View
+          style={{
+            flexDirection: "column",
+            alignItems: "center",
+          }}
         >
-          <Text>{`PM ${price.pmPrice} Bells`}</Text>
-        </Chip>
+          <Text>PM</Text>
+
+          <Chip
+            icon={() => (
+              <Text
+                style={{
+                  color:
+                    pmPriceDiff >= 0 ? theme.colors.accent : theme.colors.error,
+                }}
+              >
+                {`(${pmPriceDiff})`}
+              </Text>
+            )}
+          >
+            <Text>{`${price.pmPrice} Bells`}</Text>
+          </Chip>
+        </View>
       </>
     );
   };
