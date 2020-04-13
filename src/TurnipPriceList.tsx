@@ -1,12 +1,13 @@
 import React from "react";
 import { View, ScrollView } from "react-native";
 import { Card, IconButton, Chip, Text, useTheme } from "react-native-paper";
+import moment from "moment";
 
 import { ISellPrice, IBuyPrice } from "./types";
 import { getDayOfWeek, formatDate, isSellPrice } from "./utils";
 
 interface IProps {
-  turnipPrices: Array<ISellPrice | IBuyPrice>;
+  prices: Array<ISellPrice | IBuyPrice>;
   deleteTurnipPrice: (newTurnipPrice: ISellPrice | IBuyPrice) => void;
   onCardPress: (newTurnipPrice: ISellPrice | IBuyPrice) => void;
 }
@@ -14,30 +15,84 @@ interface IProps {
 export const TurnipPriceList: React.FC<IProps> = ({
   onCardPress,
   deleteTurnipPrice,
-  turnipPrices,
+  prices,
 }) => {
   const theme = useTheme();
+  const buyPrices = prices.filter((p) => {
+    if (isSellPrice(p) === false) {
+      return p;
+    }
+  });
+  function getLastSunday(d: Date) {
+    return moment(d).startOf("week").toDate();
+  }
+  function getLastSundayPrice(
+    price: ISellPrice,
+    prices: IBuyPrice[]
+  ): IBuyPrice | undefined {
+    const lastSundayDate = getLastSunday(price.date);
+    return prices.find(
+      (p) => moment(lastSundayDate).get("date") === moment(p.date).get("date")
+    );
+  }
 
   const BuyContent = ({ price }: { price: IBuyPrice }) => (
     <Chip>
       <Text>{`${price.price} Bells`}</Text>
     </Chip>
   );
-  const SellContent = ({ price }: { price: ISellPrice }) => (
-    <>
-      <Chip icon={() => <Text style={{ color: theme.colors.accent }}>AM</Text>}>
-        <Text>{`${price.amPrice} Bells`}</Text>
-      </Chip>
+  const SellContent = ({
+    price,
+  }: {
+    price: ISellPrice;
+    buyPrices: IBuyPrice[];
+  }) => {
+    const lastSundayPrice = getLastSundayPrice(price, buyPrices as IBuyPrice[]);
+    console.log(lastSundayPrice)
+    const amPriceDiff = lastSundayPrice?.price
+      ? price.amPrice - lastSundayPrice?.price
+      : 0;
+    const pmPriceDiff = lastSundayPrice?.price
+      ? price.pmPrice - lastSundayPrice?.price
+      : 0;
+    return (
+      <>
+        <Chip
+          icon={() => (
+            <Text
+              style={{
+                color:
+                  amPriceDiff >= 0 ? theme.colors.accent : theme.colors.error,
+              }}
+            >
+              {`(${amPriceDiff})`}
+            </Text>
+          )}
+        >
+          <Text>{`AM ${price.amPrice} Bells`}</Text>
+        </Chip>
 
-      <Chip icon={() => <Text style={{ color: theme.colors.accent }}>PM</Text>}>
-        <Text>{`${price.pmPrice} Bells`}</Text>
-      </Chip>
-    </>
-  );
+        <Chip
+          icon={() => (
+            <Text
+              style={{
+                color:
+                  pmPriceDiff >= 0 ? theme.colors.accent : theme.colors.error,
+              }}
+            >
+              {`(${pmPriceDiff})`}
+            </Text>
+          )}
+        >
+          <Text>{`PM ${price.pmPrice} Bells`}</Text>
+        </Chip>
+      </>
+    );
+  };
 
   return (
     <ScrollView>
-      {turnipPrices.map((turnipPrice, index) => (
+      {prices.map((turnipPrice, index) => (
         <Card
           onPress={() => {
             onCardPress(turnipPrice);
@@ -63,7 +118,10 @@ export const TurnipPriceList: React.FC<IProps> = ({
               style={{ justifyContent: "space-around", flexDirection: "row" }}
             >
               {isSellPrice(turnipPrice) ? (
-                <SellContent price={turnipPrice as ISellPrice} />
+                <SellContent
+                  buyPrices={buyPrices as IBuyPrice[]}
+                  price={turnipPrice as ISellPrice}
+                />
               ) : (
                 <BuyContent price={turnipPrice as IBuyPrice} />
               )}

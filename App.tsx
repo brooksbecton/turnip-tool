@@ -147,7 +147,7 @@ const App: React.FC = () => {
         <TurnipPriceList
           onCardPress={handleCardPress}
           deleteTurnipPrice={handleDelete}
-          turnipPrices={prices}
+          prices={prices}
         />
 
         <Portal>
