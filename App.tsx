@@ -43,7 +43,13 @@ const App: React.FC = () => {
   useEffect(() => {
     getSellPrices().then((newSellPrices) => {
       getBuyPrices().then((newBuyPrices) => {
-        setPrices([...newBuyPrices, ...newSellPrices]);
+        setPrices(
+          [...newBuyPrices, ...newSellPrices].sort(
+            (a: ISellPrice, b: ISellPrice) => {
+              return  new Date(b.date).getTime() - new Date(a.date).getTime();
+            }
+          )
+        );
       });
     });
   }, []);
