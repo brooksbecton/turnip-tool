@@ -58,6 +58,7 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
     setPmPrice(0);
     setDate(new Date());
     setIsShowingAddForm(false);
+    setIsShowingDatePicker(false);
   }
 
   function handleSubmit() {
@@ -114,8 +115,8 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
               value={date}
               display="calendar"
               onChange={(event, newDate) => {
+                setIsShowingDatePicker(false);
                 if (newDate) {
-                  setIsShowingDatePicker(false);
                   setDate(newDate);
                 }
               }}

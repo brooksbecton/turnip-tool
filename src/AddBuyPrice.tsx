@@ -55,6 +55,7 @@ export const AddBuyPriceForm: React.FC<IProps> = ({
     setPrice(0);
     setDate(new Date());
     setIsShowing(false);
+    setIsShowingDatePicker(false);
   }
 
   function handleSubmit() {
@@ -95,8 +96,8 @@ export const AddBuyPriceForm: React.FC<IProps> = ({
             <DateTimePicker
               value={date}
               onChange={(event, newDate) => {
+                setIsShowingDatePicker(false);
                 if (newDate) {
-                  setIsShowingDatePicker(false);
                   setDate(newDate);
                 }
               }}
