@@ -29,8 +29,8 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [id, setId] = useState("");
-  const [amPrice, setAmPrice] = useState<number>(0);
-  const [pmPrice, setPmPrice] = useState<number>(0);
+  const [amPrice, setAmPrice] = useState("");
+  const [pmPrice, setPmPrice] = useState("");
   const [date, setDate] = useState(new Date());
   const [isShowingDatePicker, setIsShowingDatePicker] = useState(false);
 
@@ -46,16 +46,16 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
   useEffect(() => {
     if (defaultTurnipPrice && isShowingAddForm === true) {
       setId(defaultTurnipPrice.id || "");
-      setAmPrice(defaultTurnipPrice.amPrice);
-      setPmPrice(defaultTurnipPrice.pmPrice);
+      setAmPrice(String(defaultTurnipPrice.amPrice));
+      setPmPrice(String(defaultTurnipPrice.pmPrice));
       setDate(new Date(defaultTurnipPrice.date));
     }
   }, [defaultTurnipPrice, isShowingAddForm]);
 
   function reset() {
     setId("");
-    setAmPrice(0);
-    setPmPrice(0);
+    setAmPrice("");
+    setPmPrice("");
     setDate(new Date());
     setIsShowingAddForm(false);
     setIsShowingDatePicker(false);
@@ -65,7 +65,12 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
     if (amPrice && pmPrice) {
       setIsLoading(true);
       try {
-        handleFormSubmit({ id, amPrice, pmPrice, date });
+        handleFormSubmit({
+          id,
+          amPrice: Number(amPrice),
+          pmPrice: Number(pmPrice),
+          date,
+        });
 
         reset();
       } catch (err) {
@@ -83,11 +88,10 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
           <TextInput
             keyboardType={"numeric"}
             onChangeText={(val) => {
-              const price = Number(val);
-              setAmPrice(price);
+              setAmPrice(val);
             }}
             textContentType={"oneTimeCode"}
-            value={amPrice !== 0 ? String(amPrice) : undefined}
+            value={amPrice}
             placeholder="AM Price"
             label="AM Price"
             style={{ marginBottom: 18 }}
@@ -95,12 +99,10 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
           <TextInput
             keyboardType={"numeric"}
             onChangeText={(val) => {
-              const price = Number(val);
-
-              setPmPrice(price);
+              setPmPrice(val);
             }}
             textContentType={"oneTimeCode"}
-            value={pmPrice !== 0 ? String(pmPrice) : undefined}
+            value={pmPrice}
             placeholder="PM Price"
             label="PM Price"
             style={{ marginBottom: 18 }}

@@ -29,7 +29,7 @@ export const AddBuyPriceForm: React.FC<IProps> = ({
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [id, setId] = useState("");
-  const [price, setPrice] = useState(0);
+  const [price, setPrice] = useState("");
   const [date, setDate] = useState(new Date());
 
   const [isShowingDatePicker, setIsShowingDatePicker] = useState(false);
@@ -45,14 +45,14 @@ export const AddBuyPriceForm: React.FC<IProps> = ({
   useEffect(() => {
     if (defaultPrice && isShowing === true) {
       setId(defaultPrice.id || "");
-      setPrice(defaultPrice.price);
+      setPrice(String(defaultPrice.price));
       setDate(new Date(defaultPrice.date));
     }
   }, [defaultPrice, isShowing]);
 
   function reset() {
     setId("");
-    setPrice(0);
+    setPrice("");
     setDate(new Date());
     setIsShowing(false);
     setIsShowingDatePicker(false);
@@ -62,7 +62,7 @@ export const AddBuyPriceForm: React.FC<IProps> = ({
     if (price) {
       setIsLoading(true);
       try {
-        handleFormSubmit({ id, price, date });
+        handleFormSubmit({ id, price: Number(price), date });
         reset();
       } catch (err) {
         console.log("error creating turnip price:", err);
@@ -71,6 +71,7 @@ export const AddBuyPriceForm: React.FC<IProps> = ({
       }
     }
   }
+  console.log(price);
   return (
     <Portal>
       <Dialog visible={isShowing} onDismiss={() => reset()}>
@@ -79,10 +80,10 @@ export const AddBuyPriceForm: React.FC<IProps> = ({
           <TextInput
             keyboardType={"numeric"}
             onChangeText={(val) => {
-              setPrice(Number(val));
+              setPrice(val);
             }}
             textContentType={"oneTimeCode"}
-            value={price !== 0 ? String(price) : undefined}
+            value={String(price)}
             placeholder="Price"
             label="Price"
             style={{ marginBottom: 18 }}
