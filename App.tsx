@@ -166,32 +166,34 @@ const App: React.FC = () => {
         />
 
         <Portal>
-          <FAB.Group
-            visible={true}
-            open={isFabOpen}
-            onPress={() => setIsFabOpen(!isFabOpen)}
-            onStateChange={() => {}}
-            icon={isFabOpen ? "bell" : "plus"}
-            actions={[
-              {
-                icon: "food-apple",
-                label: "Add Turnip Buy Price",
+          {isShowingAddForm === false && isShowingBuyForm === false && (
+            <FAB.Group
+              visible={true}
+              open={isFabOpen}
+              onPress={() => setIsFabOpen(!isFabOpen)}
+              onStateChange={() => {}}
+              icon={isFabOpen ? "bell" : "plus"}
+              actions={[
+                {
+                  icon: "food-apple",
+                  label: "Add Turnip Buy Price",
 
-                onPress: () => {
-                  setIsShowingBuyForm(true);
-                  setIsFabOpen(false);
+                  onPress: () => {
+                    setIsShowingBuyForm(true);
+                    setIsFabOpen(false);
+                  },
                 },
-              },
-              {
-                icon: "account-supervisor",
-                label: "Add Sell Price",
-                onPress: () => {
-                  setIsShowingAddForm(true);
-                  setIsFabOpen(false);
+                {
+                  icon: "account-supervisor",
+                  label: "Add Sell Price",
+                  onPress: () => {
+                    setIsShowingAddForm(true);
+                    setIsFabOpen(false);
+                  },
                 },
-              },
-            ]}
-          />
+              ]}
+            />
+          )}
         </Portal>
       </View>
     </PaperProvider>
