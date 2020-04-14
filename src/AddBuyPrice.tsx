@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+  Chip,
   Dialog,
   Portal,
   Button,
@@ -9,6 +10,7 @@ import {
 import DateTimePicker from "@react-native-community/datetimepicker";
 
 import { IBuyPrice } from "./types";
+import { formatDate } from "./utils";
 
 interface IProps {
   defaultPrice?: IBuyPrice;
@@ -30,6 +32,7 @@ export const AddBuyPriceForm: React.FC<IProps> = ({
   const [price, setPrice] = useState(0);
   const [date, setDate] = useState(new Date());
 
+  const [isShowingDatePicker, setIsShowingDatePicker] = useState(false);
   const theme = useTheme();
 
   useEffect(() => {
@@ -81,16 +84,24 @@ export const AddBuyPriceForm: React.FC<IProps> = ({
             value={price !== 0 ? String(price) : undefined}
             placeholder="Price"
             label="Price"
+            style={{ marginBottom: 18 }}
           />
 
-          <DateTimePicker
-            value={date}
-            onChange={(event, newDate) => {
-              if (newDate) {
-                setDate(newDate);
-              }
-            }}
-          />
+          <Chip onPress={() => setIsShowingDatePicker(true)} icon={"calendar"}>
+            {formatDate(date)}
+          </Chip>
+
+          {isShowingDatePicker && (
+            <DateTimePicker
+              value={date}
+              onChange={(event, newDate) => {
+                if (newDate) {
+                  setIsShowingDatePicker(false);
+                  setDate(newDate);
+                }
+              }}
+            />
+          )}
         </Dialog.Content>
         <Dialog.Actions>
           <Button
