@@ -4,17 +4,19 @@ import {
   Portal,
   Button,
   TextInput,
+  Chip,
   useTheme,
 } from "react-native-paper";
 import DateTimePicker from "@react-native-community/datetimepicker";
 
-import { ITurnipPrice } from "./types";
+import { ISellPrice } from "./types";
+import { formatDate } from "./utils";
 
 interface IProps {
-  defaultTurnipPrice: ITurnipPrice | undefined;
+  defaultTurnipPrice: ISellPrice | undefined;
   isShowingAddForm: boolean;
   setIsShowingAddForm: any;
-  handleFormSubmit: (newTurnipPrice: ITurnipPrice) => void;
+  handleFormSubmit: (newTurnipPrice: ISellPrice) => void;
   handleFormClose: () => void;
 }
 
@@ -30,6 +32,7 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
   const [amPrice, setAmPrice] = useState<number>(0);
   const [pmPrice, setPmPrice] = useState<number>(0);
   const [date, setDate] = useState(new Date());
+  const [isShowingDatePicker, setIsShowingDatePicker] = useState(false);
 
   const theme = useTheme();
 
@@ -99,16 +102,25 @@ export const AddTurnipPriceForm: React.FC<IProps> = ({
             value={pmPrice !== 0 ? String(pmPrice) : undefined}
             placeholder="PM Price"
             label="PM Price"
+            style={{ marginBottom: 18 }}
           />
 
-          <DateTimePicker
-            value={date}
-            onChange={(event, newDate) => {
-              if (newDate) {
-                setDate(newDate);
-              }
-            }}
-          />
+          <Chip onPress={() => setIsShowingDatePicker(true)} icon={"calendar"}>
+            {formatDate(date)}
+          </Chip>
+
+          {isShowingDatePicker && (
+            <DateTimePicker
+              value={date}
+              display="calendar"
+              onChange={(event, newDate) => {
+                if (newDate) {
+                  setIsShowingDatePicker(false);
+                  setDate(newDate);
+                }
+              }}
+            />
+          )}
         </Dialog.Content>
         <Dialog.Actions>
           <Button

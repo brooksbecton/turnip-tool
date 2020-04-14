@@ -11,7 +11,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import { IBuyPrice } from "./types";
 
 interface IProps {
-  defaultTurnipPrice?: IBuyPrice;
+  defaultPrice?: IBuyPrice;
   isShowing: boolean;
   setIsShowing: any;
   handleFormSubmit: (newTurnipPrice: IBuyPrice) => void;
@@ -19,7 +19,7 @@ interface IProps {
 }
 
 export const AddBuyPriceForm: React.FC<IProps> = ({
-  defaultTurnipPrice,
+  defaultPrice,
   handleFormSubmit,
   isShowing,
   setIsShowing,
@@ -40,12 +40,12 @@ export const AddBuyPriceForm: React.FC<IProps> = ({
   }, [isShowing]);
 
   useEffect(() => {
-    if (defaultTurnipPrice && isShowing === true) {
-      setId(defaultTurnipPrice.id || "");
-      setPrice(defaultTurnipPrice.price);
-      setDate(new Date(defaultTurnipPrice.date));
+    if (defaultPrice && isShowing === true) {
+      setId(defaultPrice.id || "");
+      setPrice(defaultPrice.price);
+      setDate(new Date(defaultPrice.date));
     }
-  }, [defaultTurnipPrice, isShowing]);
+  }, [defaultPrice, isShowing]);
 
   function reset() {
     setId("");

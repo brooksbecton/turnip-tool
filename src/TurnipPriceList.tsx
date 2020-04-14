@@ -48,7 +48,7 @@ export const TurnipPriceList: React.FC<IProps> = ({
     buyPrices: IBuyPrice[];
   }) => {
     const lastSundayPrice = getLastSundayPrice(price, buyPrices as IBuyPrice[]);
-    console.log(lastSundayPrice);
+    
     const amPriceDiff = lastSundayPrice?.price
       ? price.amPrice - lastSundayPrice?.price
       : 0;

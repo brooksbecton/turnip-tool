@@ -37,6 +37,8 @@ const App: React.FC = () => {
   const [defaultTurnipPrice, setDefaultTurnipPrice] = useState<
     ISellPrice | undefined
   >();
+
+  const [defaultBuyPrice, setDefaultBuyPrice] = useState<IBuyPrice>();
   const [isFabOpen, setIsFabOpen] = useState(false);
   const theme = useTheme();
 
@@ -46,7 +48,7 @@ const App: React.FC = () => {
         setPrices(
           [...newBuyPrices, ...newSellPrices].sort(
             (a: ISellPrice, b: ISellPrice) => {
-              return  new Date(b.date).getTime() - new Date(a.date).getTime();
+              return new Date(b.date).getTime() - new Date(a.date).getTime();
             }
           )
         );
@@ -89,6 +91,9 @@ const App: React.FC = () => {
     }
   }
 
+  function handleBuyFormClose() {
+    setDefaultBuyPrice({ price: 0, date: new Date() });
+  }
   function handleSellFormClose() {
     setDefaultTurnipPrice({ amPrice: 0, pmPrice: 0, date: new Date() });
   }
@@ -97,6 +102,9 @@ const App: React.FC = () => {
     if (isSellPrice(turnipPrice)) {
       setDefaultTurnipPrice(turnipPrice);
       setIsShowingAddForm(true);
+    } else {
+      setIsShowingBuyForm(true);
+      setDefaultBuyPrice(turnipPrice);
     }
   }
 
@@ -138,8 +146,9 @@ const App: React.FC = () => {
         isShowingAddForm={isShowingAddForm}
       />
       <AddBuyPriceForm
+        defaultPrice={defaultBuyPrice}
         handleFormSubmit={handleBuyFormSubmit}
-        handleFormClose={() => {}}
+        handleFormClose={handleBuyFormClose}
         setIsShowing={setIsShowingBuyForm}
         isShowing={isShowingBuyForm}
       />
